@@ -21,6 +21,7 @@
 import os
 import sys
 import time
+import uuid
 from pathlib import Path
 
 import click
@@ -46,6 +47,24 @@ except ImportError:
 
 # import pdb; pdb.set_trace()
 # from pudb import set_trace; set_trace(paused=False)
+
+def make_empty_dirs(count):
+    target = str(time.time())
+    os.makedirs(target)
+    os.chdir(target)
+    for _ in range(count):
+        os.makedirs(uuid.uuid4().hex)
+
+
+def check_df(match):
+    df_result = df("-h").splitlines()
+    found = False
+    for line in df_result:
+        if match in line:
+            ic(line)
+            found = True
+    if not found:
+        raise ValueError("{} not in df -h output".format(match))
 
 
 @click.command()
@@ -103,7 +122,7 @@ def cli(destination_folder,
 
     test_pool_file = "test_pool_{}".format(str(timestamp))
     ic(test_pool_file)
-    sys.exit(0)
+    #sys.exit(0)
     dd("if=/dev/zero", "of={}".format(test_pool_file), "bs=64M", "count=1")
     #dd if=/dev/urandom of=temp_zfs_key bs=32 count=1 || exit 1
     #key_path=`readlink -f temp_zfs_key`
@@ -118,24 +137,26 @@ def cli(destination_folder,
     ## disabled just for pure space tests
     ##zfs create -o encryption=on -o keyformat=raw -o keylocation=file://"${key_path}" -o mountpoint=/"${test_pool_file}"/spacetest_enc "${test_pool_file}"/spacetest_enc || exit 1
 
-    df_result = df("-h").splitlines()
-    found = False
-    for line in df_result:
-        if test_pool_file in line:
-            ic(line)
-            found = True
-    if not found:
-        raise ValueError("{} not in df -h output".format(test_pool_file))
+    check_df(test_pool_file)
 
     os.chdir("/{}/spacetest".format(test_pool_file))
     ic(ls("-alh"))
+    make_empty_dirs(10)
+
+    check_df(test_pool_file)
+
+    zfs_get_all_command = ["zfs", "get", "all"]
+    output = run_command(zfs_get_all_command)
+    ic(output)
+    for line in output.splitlines():
+        if test_pool_file in line:
+            ic(line)
 
 ## empty dirs 20M -> 205M
 ## > ~400000 -> "No space left on device"
 ##python3 -c "import os; import time; import uuid; target=str(time.time()); os.makedirs(target); os.chdir(target); [os.makedirs(uuid.uuid4().hex) for _ in range(100000)]" || exit 1
 #
 ## 64M -> 85325 dirs
-##python3 -c "import os; import time; import uuid; target=str(time.time()); os.makedirs(target); os.chdir(target); [os.makedirs(uuid.uuid4().hex) for _ in range($record_count)]"
 #
 ## empty files 20M -> 106M
 ##python3 -c "import os; import time; import uuid; target=str(time.time()); os.makedirs(target); os.chdir(target); [os.mknod(uuid.uuid4().hex) for _ in range(100000)]" || exit 1
@@ -161,7 +182,6 @@ def cli(destination_folder,
 #
 #df -h | grep "${test_pool_file}"
 #
-#zfs get all | grep "${test_pool_file}"
 
 
 
