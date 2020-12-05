@@ -22,9 +22,11 @@ import os
 import sys
 import time
 import uuid
+from math import inf
 from pathlib import Path
 
 import click
+from getdents import paths
 from kcl.commandops import run_command
 from kcl.pathops import path_is_block_special
 from sh import (chmod, chown, cp, dd, df, grub_install, kpartx, ln, losetup,
@@ -42,11 +44,6 @@ try:
 except ImportError:
     ic = eprint
 
-
-#from getdents import files
-
-# import pdb; pdb.set_trace()
-# from pudb import set_trace; set_trace(paused=False)
 
 def make_empty_dirs(root, count):
     target = str(time.time())
@@ -147,8 +144,8 @@ def cli(destination_folder,
 
     check_df(destination_pool_file)
 
+    make_empty_dirs(root=zfs_mountpoint, count=inf)
     ic(ls("-alh", zfs_mountpoint))
-    make_empty_dirs(root=zfs_mountpoint, count=10)
 
     check_df(destination_pool_file)
 
