@@ -137,7 +137,8 @@ def cli(destination_folder,
     zpool_create_command = ["zpool", "create", "-O", "atime=off", "-O", "compression=lz4", "-O", "mountpoint=none", zpool_name, loop]
     run_command(zpool_create_command, verbose=True)
     zfs_mountpoint = "{}_mountpoint".format(destination_pool_file)
-    zfs_create_command = ["zfs", "create", "-o", "mountpoint={}".format(zfs_mountpoint), "{}/spacetest".format(zpool_name)]
+    zfs_filesystem = "{}/spacetest".format(zpool_name)
+    zfs_create_command = ["zfs", "create", "-o", "mountpoint={}".format(zfs_mountpoint), zfs_filesystem]
     run_command(zfs_create_command, verbose=True)
 
     ## disabled just for pure space tests
@@ -155,8 +156,12 @@ def cli(destination_folder,
     output = run_command(zfs_get_all_command).decode('utf8')
     #ic(output)
     for line in output.splitlines():
-        if destination_pool_file in line:
+        if destination_pool_file.as_posix() in line:
             ic(line)
+
+    umount(zfs_mountpoint)
+    zfs_destroy_command = ["zfs", "destroy", zfs_filesystem]
+    run_command(zfs_destory_command, verbose=True)
 
 ## empty dirs 20M -> 205M
 ## > ~400000 -> "No space left on device"
