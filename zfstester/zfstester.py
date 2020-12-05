@@ -104,6 +104,7 @@ def cli(destination_folder,
     timestamp = str(time.time())
     ic(timestamp)
 
+
     if not path_is_block_special(loop):
         raise ValueError("loop device path {} is not block special".format(loop))
 
@@ -116,40 +117,40 @@ def cli(destination_folder,
     if loop in loops_in_use:
         raise ValueError("loop device {} already in use".format(loop))
 
-    os.chdir(destination_folder)
-    os.makedirs(timestamp)
-    os.chdir(timestamp)
+    destination = Path(destination_folder) / Path(timestamp)
+    os.makedirs(destination)
+    os.chdir(destination)
 
-    test_pool_file = "test_pool_{}".format(str(timestamp))
-    ic(test_pool_file)
-    #sys.exit(0)
-    dd("if=/dev/zero", "of={}".format(test_pool_file), "bs=64M", "count=1")
+    destination_pool_file = destination / Path("test_pool_{}".format(timestamp))
+    ic(destination_pool_file)
+    sys.exit(0)
+    dd("if=/dev/zero", "of={}".format(destination_pool_file), "bs=64M", "count=1")
     #dd if=/dev/urandom of=temp_zfs_key bs=32 count=1 || exit 1
     #key_path=`readlink -f temp_zfs_key`
 
-    losetup(loop, test_pool_file, loop)
+    losetup(loop, destination_pool_file, loop)
     ic(losetup("-l"))
-    zpool_create_command = ["zpool", "create", "-O", "atime=off", "-O", "compression=lz4", "-O", "mountpoint=none", test_pool_file, loop]
+    zpool_create_command = ["zpool", "create", "-O", "atime=off", "-O", "compression=lz4", "-O", "mountpoint=none", destination_pool_file, loop]
     run_command(zpool_create_command)
-    zfs_create_command = ["zfs", "create", "-o", "mountpoint=/{}/spacetest".format(test_pool_file), "{}/spacetest".format(test_pool_file)]
+    zfs_create_command = ["zfs", "create", "-o", "mountpoint=/{}/spacetest".format(destination_pool_file), "{}/spacetest".format(destination_pool_file)]
     run_command(zfs_create_command)
 
     ## disabled just for pure space tests
-    ##zfs create -o encryption=on -o keyformat=raw -o keylocation=file://"${key_path}" -o mountpoint=/"${test_pool_file}"/spacetest_enc "${test_pool_file}"/spacetest_enc || exit 1
+    ##zfs create -o encryption=on -o keyformat=raw -o keylocation=file://"${key_path}" -o mountpoint=/"${destination_pool_file}"/spacetest_enc "${destination_pool_file}"/spacetest_enc || exit 1
 
-    check_df(test_pool_file)
+    check_df(destination_pool_file)
 
-    os.chdir("/{}/spacetest".format(test_pool_file))
+    os.chdir("/{}/spacetest".format(destination_pool_file))
     ic(ls("-alh"))
     make_empty_dirs(10)
 
-    check_df(test_pool_file)
+    check_df(destination_pool_file)
 
     zfs_get_all_command = ["zfs", "get", "all"]
     output = run_command(zfs_get_all_command).decode('utf8')
     #ic(output)
     for line in output.splitlines():
-        if test_pool_file in line:
+        if destination_pool_file in line:
             ic(line)
 
 ## empty dirs 20M -> 205M
@@ -173,14 +174,14 @@ def cli(destination_folder,
 ## 64M -> 108465
 #python3 -c "import os; import time; import uuid; target=str(time.time()); os.makedirs(target); os.chdir(target); [os.symlink('None', uuid.uuid4().hex) for _ in range($record_count)]" || exit 1
 #
-#df -h | grep "${test_pool_file}" || exit 1
+#df -h | grep "${destination_pool_file}" || exit 1
 #/bin/ls -alh || exit 1
 #
 ## disabled for pure space tests
-##cp -ar * /"${test_pool_file}"/spacetest_enc/
+##cp -ar * /"${destination_pool_file}"/spacetest_enc/
 #
 #
-#df -h | grep "${test_pool_file}"
+#df -h | grep "${destination_pool_file}"
 #
 
 
