@@ -124,7 +124,6 @@ def cli(destination_folder,
 
     destination = Path(destination_folder) / Path(timestamp)
     os.makedirs(destination)
-    #os.chdir(destination)
 
     destination_pool_file = destination / Path("test_pool_{}".format(timestamp))
     ic(destination_pool_file)
@@ -148,15 +147,13 @@ def cli(destination_folder,
 
     check_df(destination_pool_file)
 
-    #os.chdir(zfs_mountpoint)
-    ic(ls("-alh"))
+    ic(ls("-alh", zfs_mountpoint))
     make_empty_dirs(root=zfs_mountpoint, count=10)
 
     check_df(destination_pool_file)
 
     zfs_get_all_command = ["zfs", "get", "all"]
     output = run_command(zfs_get_all_command).decode('utf8')
-    #ic(output)
     for line in output.splitlines():
         if destination_pool_file.as_posix() in line:
             ic(line)
@@ -198,7 +195,4 @@ def cli(destination_folder,
 #
 #
 #df -h | grep "${destination_pool_file}"
-#
-
-
 
