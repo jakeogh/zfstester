@@ -123,7 +123,7 @@ def cli(destination_folder,
 
     destination_pool_file = destination / Path("test_pool_{}".format(timestamp))
     ic(destination_pool_file)
-    sys.exit(0)
+    #sys.exit(0)
     dd("if=/dev/zero", "of={}".format(destination_pool_file), "bs=64M", "count=1")
     #dd if=/dev/urandom of=temp_zfs_key bs=32 count=1 || exit 1
     #key_path=`readlink -f temp_zfs_key`
@@ -132,7 +132,8 @@ def cli(destination_folder,
     ic(losetup("-l"))
     zpool_create_command = ["zpool", "create", "-O", "atime=off", "-O", "compression=lz4", "-O", "mountpoint=none", destination_pool_file, loop]
     run_command(zpool_create_command)
-    zfs_create_command = ["zfs", "create", "-o", "mountpoint=/{}/spacetest".format(destination_pool_file), "{}/spacetest".format(destination_pool_file)]
+    zfs_mountpoint = "{}/{}/spacetest".format(destination, destination_pool_file)
+    zfs_create_command = ["zfs", "create", "-o", "mountpoint={}".format(zfs_mountpoint), "{}/spacetest".format(destination_pool_file)]
     run_command(zfs_create_command)
 
     ## disabled just for pure space tests
