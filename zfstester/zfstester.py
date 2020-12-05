@@ -147,7 +147,11 @@ def cli(destination_folder,
 
     check_df(destination_pool_file)
 
-    make_empty_dirs(root=zfs_mountpoint, count=inf)
+    try:
+        make_empty_dirs(root=zfs_mountpoint, count=inf)
+    except Exception as e:
+        ic(e)
+
     ic(ls("-alh", zfs_mountpoint))
 
     check_df(destination_pool_file)
