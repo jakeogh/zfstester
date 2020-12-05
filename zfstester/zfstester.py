@@ -91,9 +91,11 @@ def check_df(match):
 @click.option('--debug', is_flag=True)
 @click.option('--ipython', is_flag=True)
 @click.option('--record-count', type=int)
+@click.option('--zpool-size-mb', type=int, default=64)
 @click.option("--printn", is_flag=True)
 def cli(destination_folder,
         loop,
+        zpool_size_mb,
         verbose,
         debug,
         record_count,
@@ -126,8 +128,7 @@ def cli(destination_folder,
 
     destination_pool_file = destination / Path("test_pool_{}".format(timestamp))
     ic(destination_pool_file)
-    #sys.exit(0)
-    dd("if=/dev/zero", "of={}".format(destination_pool_file), "bs=64M", "count=1")
+    dd("if=/dev/zero", "of={}".format(destination_pool_file), "bs={}M".format(zpool_size_mb), "count=1")
     #dd if=/dev/urandom of=temp_zfs_key bs=32 count=1 || exit 1
     #key_path=`readlink -f temp_zfs_key`
 
