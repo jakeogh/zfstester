@@ -20,11 +20,14 @@
 
 import os
 import sys
-from pathlib import Path
 import time
+from pathlib import Path
+
 import click
 from kcl.pathops import path_is_block_special
-from sh import dd, sudo, ls, losetup, parted, kpartx, mke2fs, grub_install, mount, umount, cp, chmod, ln, chown
+from sh import (chmod, chown, cp, dd, grub_install, kpartx, ln, losetup, ls,
+                mke2fs, mount, parted, sudo, umount)
+
 
 def eprint(*args, **kwargs):
     if 'file' in kwargs.keys():
@@ -37,9 +40,6 @@ try:
 except ImportError:
     ic = eprint
 
-
-from enumerate_input import enumerate_input
-from kcl.configops import click_read_config, click_write_config_entry
 
 #from getdents import files
 
@@ -56,7 +56,7 @@ from kcl.configops import click_read_config, click_write_config_entry
                                 allow_dash=False),
                 nargs=1,
                 required=True)
-@click.option("loop",
+@click.option("--loop",
               type=click.Path(exists=True,
                               dir_okay=False,
                               file_okay=True,
