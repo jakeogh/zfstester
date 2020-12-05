@@ -117,10 +117,11 @@ def cli(destination_folder,
         import IPython
         IPython.embed()
 
-    loops_in_use = losetup("-l")
-    ic(loops_in_use)
-    if loop in loops_in_use:
-        raise ValueError("loop device {} already in use".format(loop))
+    loops_in_use = losetup("-l").splitlines()
+    #ic(loops_in_use)
+    for line in loops_in_use:
+        if loop in loops_in_use:
+            raise ValueError("loop device {} already in use".format(loop))
 
     destination = Path(destination_folder) / Path(timestamp)
     os.makedirs(destination)
