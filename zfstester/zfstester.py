@@ -107,15 +107,11 @@ def cli(destination_folder,
         sys.exit(1)
 
     timestamp = str(time.time())
-    ic(timestamp)
-
+    if verbose:
+        ic(timestamp)
 
     if not path_is_block_special(loop):
         raise ValueError("loop device path {} is not block special".format(loop))
-
-    if ipython:
-        import IPython
-        IPython.embed()
 
     loops_in_use = losetup("-l").splitlines()
     #ic(loops_in_use)
@@ -127,15 +123,18 @@ def cli(destination_folder,
     os.makedirs(destination)
 
     destination_pool_file = destination / Path("test_pool_{}".format(timestamp))
-    ic(destination_pool_file)
+    if verbose:
+        ic(destination_pool_file)
     dd("if=/dev/zero", "of={}".format(destination_pool_file), "bs={}M".format(zpool_size_mb), "count=1")
     #dd if=/dev/urandom of=temp_zfs_key bs=32 count=1 || exit 1
     #key_path=`readlink -f temp_zfs_key`
 
     losetup(loop, destination_pool_file, loop)
-    ic(losetup("-l"))
+    if verbose:
+        ic(losetup("-l"))
     zpool_name = destination_pool_file.name
-    ic(zpool_name)
+    if verbose:
+        ic(zpool_name)
     zpool_create_command = ["zpool", "create", "-O", "atime=off", "-O", "compression=lz4", "-O", "mountpoint=none", zpool_name, loop]
     run_command(zpool_create_command, verbose=True)
     zfs_mountpoint = "{}_mountpoint".format(destination_pool_file)
@@ -158,6 +157,10 @@ def cli(destination_folder,
     for line in output.splitlines():
         if destination_pool_file.as_posix() in line:
             ic(line)
+
+    if ipython:
+        import IPython
+        IPython.embed()
 
     sync()
     umount(zfs_mountpoint)
