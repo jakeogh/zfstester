@@ -161,7 +161,10 @@ def cli(destination_folder,
 
     umount(zfs_mountpoint)
     zfs_destroy_command = ["zfs", "destroy", zfs_filesystem]
-    run_command(zfs_destory_command, verbose=True)
+    run_command(zfs_destroy_command, verbose=True)
+    zpool_destroy_command = ["zpool", "destroy", zpool_name]
+    run_command(zpool_destroy_command, verbose=True)
+    losetup("-d", loop)
 
 ## empty dirs 20M -> 205M
 ## > ~400000 -> "No space left on device"
