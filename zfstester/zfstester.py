@@ -57,6 +57,8 @@ def make_empty_dirs(count):
 
 
 def check_df(match):
+    if isinstance(match, Path):
+        match = match.as_posix()
     df_result = df("-h").splitlines()
     found = False
     for line in df_result:
