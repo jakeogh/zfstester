@@ -24,9 +24,10 @@ import time
 from pathlib import Path
 
 import click
+from kcl.commandops import run_command
 from kcl.pathops import path_is_block_special
-from sh import (chmod, chown, cp, dd, grub_install, kpartx, ln, losetup, ls,
-                mke2fs, mount, parted, sudo, umount)
+from sh import (chmod, chown, cp, dd, df, grub_install, kpartx, ln, losetup,
+                ls, mke2fs, mount, parted, sudo, umount)
 
 
 def eprint(*args, **kwargs):
@@ -81,7 +82,7 @@ def cli(destination_folder,
         ic('must be root')
         sys.exit(1)
 
-    timestamp = time.time()
+    timestamp = str(time.time())
     ic(timestamp)
 
     if not path_is_block_special(loop):
@@ -109,18 +110,26 @@ def cli(destination_folder,
 
     losetup(loop, test_pool_file, loop)
     ic(losetup("-l"))
+    zpool_create_command = ["zpool", "create", "-O", "atime=off", "-O", "compression=lz4", "-O", "mountpoint=none", test_pool_file, loop]
+    run_command(zpool_create_command)
+    zfs_create_command = ["zfs", "create", "-o", "mountpoint=/{}/spacetest".format(test_pool_file), "{}/spacetest".format(test_pool_file)]
+    run_command(zfs_create_command)
 
-#zpool create -O atime=off -O compression=lz4 -O mountpoint=none "${test_pool_file}" "${loop}" || exit 1
-#zfs create -o mountpoint=/"${test_pool_file}"/spacetest "${test_pool_file}"/spacetest || exit 1
-#
-## disabled just for pure space tests
-##zfs create -o encryption=on -o keyformat=raw -o keylocation=file://"${key_path}" -o mountpoint=/"${test_pool_file}"/spacetest_enc "${test_pool_file}"/spacetest_enc || exit 1
-#
-#df -h | grep "${test_pool_file}" || exit 1
-#
-#cd /"${test_pool_file}"/spacetest || exit 1
-#/bin/ls -alh || exit 1
-#
+    ## disabled just for pure space tests
+    ##zfs create -o encryption=on -o keyformat=raw -o keylocation=file://"${key_path}" -o mountpoint=/"${test_pool_file}"/spacetest_enc "${test_pool_file}"/spacetest_enc || exit 1
+
+    df_result = df("-h").splitlines()
+    found = False
+    for line in df_result:
+        if test_pool_file in line:
+            ic(line)
+            found = True
+    if not found:
+        raise ValueError("{} not in df -h output".format(test_pool_file))
+
+    os.chdir("/{}/spacetest".format(test_pool_file))
+    ic(ls("-alh"))
+
 ## empty dirs 20M -> 205M
 ## > ~400000 -> "No space left on device"
 ##python3 -c "import os; import time; import uuid; target=str(time.time()); os.makedirs(target); os.chdir(target); [os.makedirs(uuid.uuid4().hex) for _ in range(100000)]" || exit 1
