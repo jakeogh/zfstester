@@ -28,7 +28,7 @@ import click
 from kcl.commandops import run_command
 from kcl.pathops import path_is_block_special
 from sh import (chmod, chown, cp, dd, df, grub_install, kpartx, ln, losetup,
-                ls, mke2fs, mount, parted, sudo, umount)
+                ls, mke2fs, mount, parted, sudo, sync, umount)
 
 
 def eprint(*args, **kwargs):
@@ -48,12 +48,13 @@ except ImportError:
 # import pdb; pdb.set_trace()
 # from pudb import set_trace; set_trace(paused=False)
 
-def make_empty_dirs(count):
+def make_empty_dirs(root, count):
     target = str(time.time())
+    target = Path(root) / Path(target)
     os.makedirs(target)
-    os.chdir(target)
+    #os.chdir(target)
     for _ in range(count):
-        os.makedirs(uuid.uuid4().hex)
+        os.makedirs(target / Path(uuid.uuid4().hex))
 
 
 def check_df(match):
@@ -121,7 +122,7 @@ def cli(destination_folder,
 
     destination = Path(destination_folder) / Path(timestamp)
     os.makedirs(destination)
-    os.chdir(destination)
+    #os.chdir(destination)
 
     destination_pool_file = destination / Path("test_pool_{}".format(timestamp))
     ic(destination_pool_file)
@@ -146,9 +147,9 @@ def cli(destination_folder,
 
     check_df(destination_pool_file)
 
-    os.chdir(zfs_mountpoint)
+    #os.chdir(zfs_mountpoint)
     ic(ls("-alh"))
-    make_empty_dirs(10)
+    make_empty_dirs(root=zfs_mountpoint, count=10)
 
     check_df(destination_pool_file)
 
@@ -159,6 +160,7 @@ def cli(destination_folder,
         if destination_pool_file.as_posix() in line:
             ic(line)
 
+    sync()
     umount(zfs_mountpoint)
     zfs_destroy_command = ["zfs", "destroy", zfs_filesystem]
     run_command(zfs_destroy_command, verbose=True)
