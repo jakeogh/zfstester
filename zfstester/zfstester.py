@@ -130,7 +130,7 @@ def cli(destination_folder,
 
     losetup(loop, destination_pool_file, loop)
     ic(losetup("-l"))
-    zpool_create_command = ["zpool", "create", "-O", "atime=off", "-O", "compression=lz4", "-O", "mountpoint=none", destination_pool_file.as_posix(), loop]
+    zpool_create_command = ["zpool", "create", "-O", "atime=off", "-O", "compression=lz4", "-O", "mountpoint=none", destination_pool_file.name, loop]
     run_command(zpool_create_command)
     zfs_mountpoint = "{}/{}/spacetest".format(destination, destination_pool_file)
     zfs_create_command = ["zfs", "create", "-o", "mountpoint={}".format(zfs_mountpoint), "{}/spacetest".format(destination_pool_file.as_posix())]
