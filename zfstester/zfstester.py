@@ -146,8 +146,8 @@ def cli(destination_folder,
     check_df(test_pool_file)
 
     zfs_get_all_command = ["zfs", "get", "all"]
-    output = run_command(zfs_get_all_command)
-    ic(output)
+    output = run_command(zfs_get_all_command).decode('utf8')
+    #ic(output)
     for line in output.splitlines():
         if test_pool_file in line:
             ic(line)
