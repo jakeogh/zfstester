@@ -64,7 +64,6 @@ except ImportError:
                               allow_dash=False),
               nargs=1,
               required=True)
-@click.option('--add', is_flag=True)
 @click.option('--verbose', is_flag=True)
 @click.option('--debug', is_flag=True)
 @click.option('--ipython', is_flag=True)
