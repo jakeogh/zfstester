@@ -96,9 +96,9 @@ def cli(destination_folder,
     if loop in loops_in_use:
         raise ValueError("loop device {} already in use".format(loop))
 
-    os.cwd(destination_folder)
+    os.chdir(destination_folder)
     os.makedirs(timestamp)
-    os.cwd(timestamp)
+    os.chdir(timestamp)
 
     test_pool_file = "test_pool_{}".format(str(timestamp))
     ic(test_pool_file)
