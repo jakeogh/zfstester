@@ -49,9 +49,12 @@ def make_empty_dirs(root, count):
     target = str(time.time())
     target = Path(root) / Path(target)
     os.makedirs(target)
-    #os.chdir(target)
-    for _ in range(count):
-        os.makedirs(target / Path(uuid.uuid4().hex))
+    if count != inf:
+        for _ in range(count):
+            os.makedirs(target / Path(uuid.uuid4().hex))
+    else:
+        while True:
+            os.makedirs(target / Path(uuid.uuid4().hex))
 
 
 def check_df(match):
