@@ -131,18 +131,19 @@ def cli(destination_folder,
     losetup(loop, destination_pool_file, loop)
     ic(losetup("-l"))
     zpool_name = destination_pool_file.name
+    ic(zpool_name)
     zpool_create_command = ["zpool", "create", "-O", "atime=off", "-O", "compression=lz4", "-O", "mountpoint=none", zpool_name, loop]
-    run_command(zpool_create_command)
-    zfs_mountpoint = "{}/spacetest".format(destination_pool_file)
-    zfs_create_command = ["zfs", "create", "-o", "mountpoint={}".format(zfs_mountpoint), "{}_mountpoint".format(zpool_name)]
-    run_command(zfs_create_command)
+    run_command(zpool_create_command, verbose=True)
+    zfs_mountpoint = "{}_mountpoint".format(destination_pool_file)
+    zfs_create_command = ["zfs", "create", "-o", "mountpoint={}".format(zfs_mountpoint), "{}/spacetest".format(zpool_name)]
+    run_command(zfs_create_command, verbose=True)
 
     ## disabled just for pure space tests
     ##zfs create -o encryption=on -o keyformat=raw -o keylocation=file://"${key_path}" -o mountpoint=/"${destination_pool_file}"/spacetest_enc "${destination_pool_file}"/spacetest_enc || exit 1
 
     check_df(destination_pool_file)
 
-    os.chdir("/{}/spacetest".format(destination_pool_file))
+    os.chdir(zfs_mountpoint)
     ic(ls("-alh"))
     make_empty_dirs(10)
 
