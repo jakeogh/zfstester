@@ -81,6 +81,9 @@ def cli(destination_folder,
         ic('must be root')
         sys.exit(1)
 
+    timestamp = time.time()
+    ic(timestamp)
+
     if not path_is_block_special(loop):
         raise ValueError("loop device path {} is not block special".format(loop))
 
@@ -88,20 +91,25 @@ def cli(destination_folder,
         import IPython
         IPython.embed()
 
+    loops_in_use = losetup("-l")
+    ic(loops_in_use)
+    if loop in loops_in_use:
+        raise ValueError("loop device {} already in use".format(loop))
+
+    os.cwd(destination_folder)
+    os.makedirs(timestamp)
+    os.cwd(timestamp)
+
+    test_pool_file = "test_pool_{}".format(str(timestamp))
+    ic(test_pool_file)
+    sys.exit(0)
+    dd("if=/dev/zero", "of={}".format(test_pool_file), "bs=64M", "count=1")
+    #dd if=/dev/urandom of=temp_zfs_key bs=32 count=1 || exit 1
+    #key_path=`readlink -f temp_zfs_key`
+
+    losetup(loop, test_pool_file, loop)
     ic(losetup("-l"))
 
-#    losetup -l | grep "${loop}" && { echo "${loop} is in use" ; exit 1 ; }
-#
-#timestamp=`date +%s`
-#mkdir "${timestamp}"
-#cd "${timestamp}" || exit 1
-#test_pool_file="test_pool_${timestamp}"
-#
-#dd if=/dev/zero of="${test_pool_file}" bs=64M count=1 || exit 1
-#dd if=/dev/urandom of=temp_zfs_key bs=32 count=1 || exit 1
-#key_path=`readlink -f temp_zfs_key`
-#losetup "${loop}" "${test_pool_file}" ${loop} || exit 1
-#
 #zpool create -O atime=off -O compression=lz4 -O mountpoint=none "${test_pool_file}" "${loop}" || exit 1
 #zfs create -o mountpoint=/"${test_pool_file}"/spacetest "${test_pool_file}"/spacetest || exit 1
 #
