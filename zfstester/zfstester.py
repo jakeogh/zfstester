@@ -126,6 +126,9 @@ def cli(destination_folder,
         ic('must be root')
         sys.exit(1)
 
+    if zpool_size_mb < 64:
+        raise ValueError('minimum zpool size is 64MB')
+
     timestamp = str(time.time())
     if verbose:
         ic(timestamp)
