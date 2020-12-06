@@ -163,13 +163,13 @@ def cli(destination_folder,
     zpool_name = destination_pool_file.name
     if verbose:
         ic(zpool_name)
-    zpool_create_command = ["zpool", "create", "-O", "atime=off", "-O", "compression=lz4","recordsize="+recordsize, "-O", "mountpoint=none", zpool_name, loop]
+    zpool_create_command = ["zpool", "create", "-O", "atime=off", "-O", "compression=lz4", "-O", "mountpoint=none", zpool_name, loop]
     run_command(zpool_create_command, verbose=True)
     atexit.register(destroy_zfs_pool, zpool_name)
 
     zfs_mountpoint = "{}_mountpoint".format(destination_pool_file)
     zfs_filesystem = "{}/spacetest".format(zpool_name)
-    zfs_create_command = ["zfs", "create", "-o", "mountpoint={}".format(zfs_mountpoint), zfs_filesystem]
+    zfs_create_command = ["zfs", "create", "-o", "mountpoint={}".format(zfs_mountpoint), "-o", "recordsize=" + recordsize, zfs_filesystem]
     run_command(zfs_create_command, verbose=True)
     atexit.register(destroy_zfs_filesystem, zfs_filesystem)
     atexit.register(umount_zfs_filesystem, zfs_mountpoint)
