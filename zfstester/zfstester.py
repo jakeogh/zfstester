@@ -30,7 +30,7 @@ import click
 from getdents import paths
 from kcl.commandops import run_command
 from kcl.pathops import path_is_block_special
-from pathstat import pathstat
+from pathstat import display_results, pathstat
 from sh import (chmod, chown, cp, dd, df, grub_install, kpartx, ln, losetup,
                 ls, mke2fs, mount, parted, sudo, sync, umount)
 
@@ -187,7 +187,9 @@ def cli(destination_folder,
     check_df(destination_pool_file)
 
     sync()
-    pathstat_result = pathstat(path=zfs_mountpoint, verbose=verbose)
+    pathstat_results = pathstat(path=zfs_mountpoint, verbose=verbose)
+    display_results(pathstat_results, verbose=verbose)
+
     zfs_get_all_command = ["zfs", "get", "all"]
     output = run_command(zfs_get_all_command).decode('utf8')
     for line in output.splitlines():
@@ -198,16 +200,7 @@ def cli(destination_folder,
         import IPython
         IPython.embed()
 
-    #umount_zfs_filesystem(zfs_mountpoint)
-    #destroy_zfs_filesystem(zfs_filesystem)
-    #destroy_zfs_pool(zpool_name)
-    #cleanup_loop_device(loop)
 
-## empty dirs 20M -> 205M
-## > ~400000 -> "No space left on device"
-##python3 -c "import os; import time; import uuid; target=str(time.time()); os.makedirs(target); os.chdir(target); [os.makedirs(uuid.uuid4().hex) for _ in range(100000)]" || exit 1
-#
-## 64M -> 85325 dirs
 #
 ## empty files 20M -> 106M
 ##python3 -c "import os; import time; import uuid; target=str(time.time()); os.makedirs(target); os.chdir(target); [os.mknod(uuid.uuid4().hex) for _ in range(100000)]" || exit 1
