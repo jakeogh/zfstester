@@ -118,7 +118,7 @@ def destroy_zfs_pool(pool):
 def cli(destination_folder,
         loop,
         zpool_size_mb,
-        recordsize,
+        recordsize_kb,
         verbose,
         debug,
         record_count,
