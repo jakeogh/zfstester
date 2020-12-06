@@ -193,7 +193,7 @@ def cli(destination_folder,
     zfs_get_all_command = ["zfs", "get", "all"]
     output = run_command(zfs_get_all_command).decode('utf8')
     for line in output.splitlines():
-        if destination_pool_file.as_posix() in line:
+        if destination_pool_file.name in line:
             ic(line)
 
     if ipython:
