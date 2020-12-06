@@ -153,17 +153,23 @@ def cli(destination_folder,
     #key_path=`readlink -f temp_zfs_key`
 
     losetup(loop, destination_pool_file, loop)
+    atexit.register(cleanup_loop_device, loop)
     if verbose:
         ic(losetup("-l"))
+
     zpool_name = destination_pool_file.name
     if verbose:
         ic(zpool_name)
     zpool_create_command = ["zpool", "create", "-O", "atime=off", "-O", "compression=lz4", "-O", "mountpoint=none", zpool_name, loop]
     run_command(zpool_create_command, verbose=True)
+    atexit.register(destroy_zfs_pool, zpool_name)
+
     zfs_mountpoint = "{}_mountpoint".format(destination_pool_file)
     zfs_filesystem = "{}/spacetest".format(zpool_name)
     zfs_create_command = ["zfs", "create", "-o", "mountpoint={}".format(zfs_mountpoint), zfs_filesystem]
     run_command(zfs_create_command, verbose=True)
+    atexit.register(destroy_zfs_filesystem, zfs_filesystem)
+    atexit.register(umount_zfs_filesystem, zfs_mountpoint)
 
     ## disabled just for pure space tests
     ##zfs create -o encryption=on -o keyformat=raw -o keylocation=file://"${key_path}" -o mountpoint=/"${destination_pool_file}"/spacetest_enc "${destination_pool_file}"/spacetest_enc || exit 1
@@ -191,10 +197,10 @@ def cli(destination_folder,
         import IPython
         IPython.embed()
 
-    umount_zfs_filesystem(zfs_mountpoint)
-    destroy_zfs_filesystem(zfs_filesystem)
-    destroy_zfs_pool(zpool_name)
-    cleanup_loop_device(loop)
+    #umount_zfs_filesystem(zfs_mountpoint)
+    #destroy_zfs_filesystem(zfs_filesystem)
+    #destroy_zfs_pool(zpool_name)
+    #cleanup_loop_device(loop)
 
 ## empty dirs 20M -> 205M
 ## > ~400000 -> "No space left on device"
