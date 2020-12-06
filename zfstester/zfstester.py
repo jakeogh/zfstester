@@ -29,6 +29,7 @@ import click
 from getdents import paths
 from kcl.commandops import run_command
 from kcl.pathops import path_is_block_special
+from pathstat import pathstat
 from sh import (chmod, chown, cp, dd, df, grub_install, kpartx, ln, losetup,
                 ls, mke2fs, mount, parted, sudo, sync, umount)
 
@@ -156,6 +157,8 @@ def cli(destination_folder,
 
     check_df(destination_pool_file)
 
+    sync()
+    pathstat(path=zfs_mountpoint, verbose=verbose)
     zfs_get_all_command = ["zfs", "get", "all"]
     output = run_command(zfs_get_all_command).decode('utf8')
     for line in output.splitlines():
@@ -166,7 +169,6 @@ def cli(destination_folder,
         import IPython
         IPython.embed()
 
-    sync()
     umount(zfs_mountpoint)
     zfs_destroy_command = ["zfs", "destroy", zfs_filesystem]
     run_command(zfs_destroy_command, verbose=True)
