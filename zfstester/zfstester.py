@@ -191,6 +191,7 @@ def cli(destination_folder,
     sync()
     pathstat_results = pathstat(path=zfs_mountpoint, verbose=verbose)
     display_results(pathstat_results, verbose=verbose)
+    # 128K recordsize: 81266
 
     zfs_get_all_command = ["zfs", "get", "all"]
     output = run_command(zfs_get_all_command).decode('utf8')
