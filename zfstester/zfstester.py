@@ -18,6 +18,7 @@
 # pylint: disable=R0916  # Too many boolean expressions in if statement
 
 
+import atexit
 import os
 import sys
 import time
@@ -69,6 +70,24 @@ def check_df(match):
             found = True
     if not found:
         raise ValueError("{} not in df -h output".format(match))
+
+
+def cleanup_loop_device(device):
+    losetup("-d", device)
+
+
+def umount_zfs_filesystem(mountpoint):
+    umount(mountpoint)
+
+
+def destroy_zfs_filesystem(filesystem):
+    destroy_command = ["zfs", "destroy", filesystem]
+    run_command(destroy_command, verbose=True)
+
+
+def destroy_zfs_pool(pool):
+    zpool_destroy_command = ["zpool", "destroy", pool]
+    run_command(zpool_destroy_command, verbose=True)
 
 
 @click.command()
@@ -169,12 +188,10 @@ def cli(destination_folder,
         import IPython
         IPython.embed()
 
-    umount(zfs_mountpoint)
-    zfs_destroy_command = ["zfs", "destroy", zfs_filesystem]
-    run_command(zfs_destroy_command, verbose=True)
-    zpool_destroy_command = ["zpool", "destroy", zpool_name]
-    run_command(zpool_destroy_command, verbose=True)
-    losetup("-d", loop)
+    umount_zfs_filesystem(zfs_mountpoint)
+    destroy_zfs_filesystem(zfs_filesystem)
+    destroy_zfs_pool(zpool_name)
+    cleanup_loop_device(loop)
 
 ## empty dirs 20M -> 205M
 ## > ~400000 -> "No space left on device"
