@@ -163,7 +163,7 @@ def cli(destination_folder,
     zpool_name = destination_pool_file.name
     if verbose:
         ic(zpool_name)
-    zpool_create_command = ["zpool", "create", "-O", "atime=off", "-O", "compression=lz4", "-O", "mountpoint=none", zpool_name, loop]
+    zpool_create_command = ["zpool", "create", "-O", "atime=off", "-O", "compression=lz4", "-O", "mountpoint=none", "-O", "recordsize=" + recordsize, zpool_name, loop]
     run_command(zpool_create_command, verbose=True)
     atexit.register(destroy_zfs_pool, zpool_name)
 
@@ -192,6 +192,7 @@ def cli(destination_folder,
     pathstat_results = pathstat(path=zfs_mountpoint, verbose=verbose)
     display_results(pathstat_results, verbose=verbose)
     # 128K recordsize: 81266
+    # 512  recordsize: 80894
 
     zfs_get_all_command = ["zfs", "get", "all"]
     output = run_command(zfs_get_all_command).decode('utf8')
