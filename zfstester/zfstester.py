@@ -47,16 +47,17 @@ except ImportError:
     ic = eprint
 
 
-def make_empty_dirs(root, count):
+def make_things(root, count, thing_function):
+    assert thing_function in [os.makedirs, os.mknod, os.symlink]
     target = str(time.time())
     target = Path(root) / Path(target)
     os.makedirs(target)
     if count != inf:
         for _ in range(count):
-            os.makedirs(target / Path(uuid.uuid4().hex))
+            thing_function(target / Path(uuid.uuid4().hex))
     else:
         while True:
-            os.makedirs(target / Path(uuid.uuid4().hex))
+            thing_function(target / Path(uuid.uuid4().hex))
 
 
 def check_df(match):
@@ -177,7 +178,7 @@ def cli(destination_folder,
     check_df(destination_pool_file)
 
     try:
-        make_empty_dirs(root=zfs_mountpoint, count=inf)
+        make_things(root=zfs_mountpoint, count=inf, thing_function=os.makedirs)
     except Exception as e:
         ic(e)
 
@@ -186,7 +187,7 @@ def cli(destination_folder,
     check_df(destination_pool_file)
 
     sync()
-    pathstat(path=zfs_mountpoint, verbose=verbose)
+    pathstat_result = pathstat(path=zfs_mountpoint, verbose=verbose)
     zfs_get_all_command = ["zfs", "get", "all"]
     output = run_command(zfs_get_all_command).decode('utf8')
     for line in output.splitlines():
