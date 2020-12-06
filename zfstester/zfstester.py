@@ -113,12 +113,12 @@ def destroy_zfs_pool(pool):
 @click.option('--ipython', is_flag=True)
 @click.option('--record-count', type=int)
 @click.option('--zpool-size-mb', type=int, default=64)
-@click.option('--recordsize-kb', type=int, default=128)
+@click.option('--recordsize', type=str, default="128K")  # The size specified must be a power of two greater than or equal to 512 and less than or equal to 128 Kbytes man zprops
 @click.option("--printn", is_flag=True)
 def cli(destination_folder,
         loop,
         zpool_size_mb,
-        recordsize_kb,
+        recordsize,
         verbose,
         debug,
         record_count,
@@ -163,7 +163,7 @@ def cli(destination_folder,
     zpool_name = destination_pool_file.name
     if verbose:
         ic(zpool_name)
-    zpool_create_command = ["zpool", "create", "-O", "atime=off", "-O", "compression=lz4","recordsize="+int(recordsize_kb), "-O", "mountpoint=none", zpool_name, loop]
+    zpool_create_command = ["zpool", "create", "-O", "atime=off", "-O", "compression=lz4","recordsize="+recordsize, "-O", "mountpoint=none", zpool_name, loop]
     run_command(zpool_create_command, verbose=True)
     atexit.register(destroy_zfs_pool, zpool_name)
 
