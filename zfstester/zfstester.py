@@ -107,7 +107,7 @@ def destroy_zfs_pool(pool):
                               path_type=str,
                               allow_dash=False),
               nargs=1,
-              required=True)
+              required=False)
 @click.option('--verbose', is_flag=True)
 @click.option('--debug', is_flag=True)
 @click.option('--ipython', is_flag=True)
@@ -138,6 +138,9 @@ def cli(destination_folder,
 
     if not path_is_block_special(loop):
         raise ValueError("loop device path {} is not block special".format(loop))
+
+    if not loop:
+        loop = '/dev/loop0'
 
     loops_in_use = losetup("-l").splitlines()
     #ic(loops_in_use)
