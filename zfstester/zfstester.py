@@ -28,11 +28,26 @@ from pathlib import Path
 
 import click
 from getdents import paths
-from kcl.commandops import run_command
 from kcl.pathops import path_is_block_special
-from pathstat import display_results, pathstat
-from sh import (chmod, chown, cp, dd, df, grub_install, kpartx, ln, losetup,
-                ls, mke2fs, mount, parted, sudo, sync, umount)
+from pathstat import display_results
+from pathstat import pathstat
+from run_command import run_command
+from sh import chmod
+from sh import chown
+from sh import cp
+from sh import dd
+from sh import df
+from sh import grub_install
+from sh import kpartx
+from sh import ln
+from sh import losetup
+from sh import ls
+from sh import mke2fs
+from sh import mount
+from sh import parted
+from sh import sudo
+from sh import sync
+from sh import umount
 
 
 def eprint(*args, **kwargs):
