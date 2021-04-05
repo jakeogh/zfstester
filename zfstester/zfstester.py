@@ -17,6 +17,7 @@
 # pylint: disable=W0201  # attribute defined outside __init__
 # pylint: disable=R0916  # Too many boolean expressions in if statement
 
+# pylint: disable=no-name-in-module  # sh
 
 import atexit
 import os
@@ -151,11 +152,11 @@ def cli(destination_folder,
     if verbose:
         ic(timestamp)
 
-    if not path_is_block_special(loop):
-        raise ValueError("loop device path {} is not block special".format(loop))
-
     if not loop:
         loop = '/dev/loop0'
+
+    if not path_is_block_special(loop):
+        raise ValueError("loop device path {} is not block special".format(loop))
 
     loops_in_use = losetup("-l").splitlines()
     #ic(loops_in_use)
