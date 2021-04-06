@@ -33,6 +33,7 @@ from kcl.pathops import path_is_block_special
 from pathstat import display_results
 from pathstat import pathstat
 from run_command import run_command
+#from with_chdir import chdir
 from sh import chmod
 from sh import chown
 from sh import cp
@@ -131,15 +132,16 @@ def destroy_zfs_pool(pool):
 @click.option('--zpool-size-mb', type=int, default=64)
 @click.option('--recordsize', type=str, default="128K")  # The size specified must be a power of two greater than or equal to 512 and less than or equal to 128 Kbytes man zprops
 @click.option("--printn", is_flag=True)
-def cli(destination_folder,
-        loop,
-        zpool_size_mb,
-        recordsize,
-        verbose,
-        debug,
-        record_count,
-        ipython,
-        printn,):
+def cli(destination_folder: str,
+        loop: str,
+        zpool_size_mb: int,
+        recordsize: str,
+        verbose: bool,
+        debug: bool,
+        record_count: int,
+        ipython: bool,
+        printn: bool,
+        ):
 
     if os.getuid() != 0:
         ic('must be root')
@@ -164,7 +166,7 @@ def cli(destination_folder,
         if loop in loops_in_use:
             raise ValueError("loop device {} already in use".format(loop))
 
-    destination = Path(destination_folder) / Path(timestamp)
+    destination = Path(destination_folder) / Path('zfstester_' + timestamp)
     os.makedirs(destination)
 
     destination_pool_file = destination / Path("test_pool_{}".format(timestamp))
@@ -206,7 +208,9 @@ def cli(destination_folder,
     check_df(destination_pool_file)
 
     try:
-        make_things(root=zfs_mountpoint, count=inf, thing_function=os.makedirs)
+        make_things(root=zfs_mountpoint,
+                    count=inf,
+                    thing_function=os.makedirs)
     except Exception as e:
         ic(e)
 
