@@ -182,7 +182,14 @@ def cli(destination_folder,
     zpool_name = destination_pool_file.name
     if verbose:
         ic(zpool_name)
-    zpool_create_command = ["zpool", "create", "-O", "atime=off", "-O", "compression=lz4", "-O", "mountpoint=none", "-O", "recordsize=" + recordsize, zpool_name, loop]
+    zpool_create_command = ["zpool",
+                            "create",
+                            "-O", "atime=off",
+                            "-O", "compression=lz4",
+                            "-O", "mountpoint=none",
+                            "-O", "recordsize=" + recordsize,
+                            zpool_name,
+                            loop]
     run_command(zpool_create_command, verbose=True)
     atexit.register(destroy_zfs_pool, zpool_name)
 
