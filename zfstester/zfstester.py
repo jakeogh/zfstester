@@ -193,13 +193,13 @@ def cli(destination_folder: str,
                             zpool_name,
                             loop]
     run_command(zpool_create_command, verbose=True)
-    atexit.register(destroy_zfs_pool, zpool_name)
+    #atexit.register(destroy_zfs_pool, zpool_name)
 
     zfs_mountpoint = "{}_mountpoint".format(destination_pool_file)
     zfs_filesystem = "{}/spacetest".format(zpool_name)
     zfs_create_command = ["zfs", "create", "-o", "mountpoint={}".format(zfs_mountpoint), "-o", "recordsize=" + recordsize, zfs_filesystem]
     run_command(zfs_create_command, verbose=True)
-    atexit.register(destroy_zfs_filesystem, zfs_filesystem)
+    #atexit.register(destroy_zfs_filesystem, zfs_filesystem)
     atexit.register(umount_zfs_filesystem, zfs_mountpoint)
 
     ## disabled just for pure space tests
