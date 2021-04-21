@@ -28,12 +28,13 @@ from math import inf
 from pathlib import Path
 
 import click
+#from with_chdir import chdir
+import sh
 from getdents import paths
 from kcl.pathops import path_is_block_special
 from pathstat import display_results
 from pathstat import pathstat
 from run_command import run_command
-#from with_chdir import chdir
 from sh import chmod
 from sh import chown
 from sh import cp
@@ -229,6 +230,8 @@ def cli(destination_folder: str,
     for line in output.splitlines():
         if destination_pool_file.name in line:
             ic(line)
+
+    sh.rzip('-k', '-9', '-o', destination_pool_file.as_posix() + '.rz', destination_pool_file.as_posix())
 
     if ipython:
         import IPython
