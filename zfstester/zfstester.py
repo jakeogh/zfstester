@@ -231,7 +231,12 @@ def cli(destination_folder: str,
         if destination_pool_file.name in line:
             ic(line)
 
-    sh.rzip('-k', '-9', '-o', destination_pool_file.as_posix() + '.rz', destination_pool_file.as_posix())
+    destination_pool_file_rzip = destination_pool_file.as_posix() + '.rz',
+    sh.rzip('-k', '-9', '-o', destination_pool_file_rzip, destination_pool_file.as_posix())
+    ic(sh.ls('-a', '-l', '-h', destination_pool_file.as_posix(), destination_pool_file_rzip))
+
+    ic(pathstat_results)
+    ic('Why did this {zpool_size_mb} pool run out of space? We wrote exactly (something) bytes to it by creating (N) directories under the root of the single zfs filesystem we created.'.format(zpool_size_mb=zpool_size_mb))
 
     if ipython:
         import IPython
