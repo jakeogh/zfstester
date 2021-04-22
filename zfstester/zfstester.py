@@ -92,11 +92,11 @@ def check_df(match):
 
 
 def cleanup_loop_device(device):
-    losetup("-d", device)
+    print(losetup("-d", device))
 
 
 def umount_zfs_filesystem(mountpoint):
-    umount(mountpoint)
+    print(umount(mountpoint))
 
 
 def destroy_zfs_filesystem(filesystem):
