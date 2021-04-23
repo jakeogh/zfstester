@@ -238,7 +238,9 @@ def cli(destination_folder: str,
 
     ic('Summary:')
     ic(pathstat_results)
-    ic('Why did this {zpool_size_mb} pool run out of space? We wrote exactly (something) bytes to it by creating (N) directories under the root of the single zfs filesystem we created. Compressed, the pool file takes {compressed_file_size} bytes'.format(zpool_size_mb=zpool_size_mb, compressed_file_size=compressed_file_size))
+    bytes_in_names = pathstat_results['bytes_in_names']
+    objects_created = pathstat_results[4]
+    print('Why did this {zpool_size_mb}MB pool run out of space? We wrote exactly {bytes_in_names}bytes to it by creating {objects_created} directories under the root of the single zfs filesystem we created. Compressed, the pool file takes {compressed_file_size} bytes'.format(zpool_size_mb=zpool_size_mb, compressed_file_size=compressed_file_size, bytes_in_names=bytes_in_names, objects_created=objects_created))
 
     if ipython:
         import IPython
