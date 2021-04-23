@@ -236,11 +236,11 @@ def cli(destination_folder: str,
     compressed_file_size = os.stat(destination_pool_file_rzip).st_size
     ic(compressed_file_size)
 
-    ic('Summary:')
-    ic(pathstat_results)
+    print('Summary:')
+    #ic(pathstat_results)
     bytes_in_names = pathstat_results['bytes_in_names']
     objects_created = pathstat_results[4]
-    print('Why did this {zpool_size_mb}MB pool run out of space? We wrote exactly {bytes_in_names}bytes to it by creating {objects_created} directories under the root of the single zfs filesystem we created. Compressed, the pool file takes {compressed_file_size} bytes'.format(zpool_size_mb=zpool_size_mb, compressed_file_size=compressed_file_size, bytes_in_names=bytes_in_names, objects_created=objects_created))
+    print('Why did this {zpool_size_mb}MB pool run out of space?\n We wrote exactly {bytes_in_names} bytes to it by creating {objects_created} empty directories under the root of the zfs filesystem.\n Compressed, the pool file takes {compressed_file_size} bytes'.format(zpool_size_mb=zpool_size_mb, compressed_file_size=compressed_file_size, bytes_in_names=bytes_in_names, objects_created=objects_created))
 
     if ipython:
         import IPython
