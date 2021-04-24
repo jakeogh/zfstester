@@ -233,7 +233,10 @@ def cli(destination_folder: str,
 
     df_inodes = str(sh.df('-i'))
     #ic(df_inodes)
-    for line in df_inodes.splitlines():
+    print()
+    for index, line in enumerate(df_inodes.splitlines()):
+        if index == 0:
+            print(line)  # df -i header
         if destination_pool_file.name in line:
             print(line)
 
@@ -241,7 +244,7 @@ def cli(destination_folder: str,
     destination_pool_file_rzip = destination_pool_file.as_posix() + '.rz'
     sh.rzip('-k', '-9', '-o', destination_pool_file_rzip, destination_pool_file.as_posix())
     compressed_file_size = os.stat(destination_pool_file_rzip).st_size
-    ic(compressed_file_size)
+    #ic(compressed_file_size)
 
     print('Summary:')
     #ic(pathstat_results)
