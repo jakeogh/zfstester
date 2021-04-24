@@ -232,7 +232,11 @@ def cli(destination_folder: str,
             print(line)
 
     df_inodes = str(sh.df('-i'))
-    ic(df_inodes)
+    #ic(df_inodes)
+    for line in df_inodes.splitlines():
+        if destination_pool_file.name in line:
+            print(line)
+
 
     destination_pool_file_rzip = destination_pool_file.as_posix() + '.rz'
     sh.rzip('-k', '-9', '-o', destination_pool_file_rzip, destination_pool_file.as_posix())
@@ -243,7 +247,7 @@ def cli(destination_folder: str,
     #ic(pathstat_results)
     bytes_in_names = pathstat_results['bytes_in_names']
     objects_created = pathstat_results[4]
-    print('Why did this {zpool_size_mb}MB pool run out of space?\n We wrote exactly {bytes_in_names} bytes to it by creating {objects_created} empty directories (with random uncompressable names) under the root of the zfs filesystem.\n Compressed, the pool file takes {compressed_file_size} bytes'.format(zpool_size_mb=zpool_size_mb, compressed_file_size=compressed_file_size, bytes_in_names=bytes_in_names, objects_created=objects_created))
+    print('Why did this {zpool_size_mb}MB pool run out of space?\n We wrote exactly {bytes_in_names} bytes to it by creating {objects_created} empty directories (with random uncompressable names) under the root of the zfs filesystem.\n Compressed, the pool file takes {compressed_file_size} bytes.'.format(zpool_size_mb=zpool_size_mb, compressed_file_size=compressed_file_size, bytes_in_names=bytes_in_names, objects_created=objects_created))
 
     if ipython:
         import IPython
