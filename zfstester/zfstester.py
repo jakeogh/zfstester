@@ -252,6 +252,8 @@ def cli(destination_folder: str,
     objects_created = pathstat_results[4]
     print('Why did this {zpool_size_mb}MB pool run out of space?\n We wrote exactly {bytes_in_names} bytes to it by creating {objects_created} empty directories (with random uncompressable names) under the root of the zfs filesystem.\n Compressed, the pool file takes {compressed_file_size} bytes.'.format(zpool_size_mb=zpool_size_mb, compressed_file_size=compressed_file_size, bytes_in_names=bytes_in_names, objects_created=objects_created))
 
+    compression_ratio = (compressed_file_size / (zpool_size_mb * 1024 * 1024)) * 100
+    ic(compression_ratio)
     if ipython:
         import IPython
         IPython.embed()
