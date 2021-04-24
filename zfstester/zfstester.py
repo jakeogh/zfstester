@@ -229,7 +229,8 @@ def cli(destination_folder: str,
     output = run_command(zfs_get_all_command).decode('utf8')
     for line in output.splitlines():
         if destination_pool_file.name in line:
-            ic(line)
+            print(line)
+
     df_inodes = str(sh.df('-i'))
     ic(df_inodes)
 
