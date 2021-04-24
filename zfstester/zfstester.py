@@ -30,27 +30,11 @@ from pathlib import Path
 import click
 #from with_chdir import chdir
 import sh
-from getdents import paths
+#from getdents import paths
 from kcl.pathops import path_is_block_special
 from pathstat import display_results
 from pathstat import pathstat
 from run_command import run_command
-from sh import chmod
-from sh import chown
-from sh import cp
-from sh import dd
-from sh import df
-from sh import grub_install
-from sh import kpartx
-from sh import ln
-from sh import losetup
-from sh import ls
-from sh import mke2fs
-from sh import mount
-from sh import parted
-from sh import sudo
-from sh import sync
-from sh import umount
 
 
 def eprint(*args, **kwargs):
@@ -81,7 +65,7 @@ def make_things(root, count, thing_function):
 def check_df(match):
     if isinstance(match, Path):
         match = match.as_posix()
-    df_result = df("-h").splitlines()
+    df_result = sh.df("-h").splitlines()
     found = False
     for line in df_result:
         if match in line:
@@ -92,11 +76,11 @@ def check_df(match):
 
 
 def cleanup_loop_device(device):
-    print(losetup("-d", device))
+    print(sh.losetup("-d", device))
 
 
 def umount_zfs_filesystem(mountpoint):
-    print(umount(mountpoint))
+    print(sh.umount(mountpoint))
 
 
 def destroy_zfs_filesystem(filesystem):
@@ -161,7 +145,7 @@ def cli(destination_folder: str,
     if not path_is_block_special(loop):
         raise ValueError("loop device path {} is not block special".format(loop))
 
-    loops_in_use = losetup("-l").splitlines()
+    loops_in_use = sh.losetup("-l").splitlines()
     #ic(loops_in_use)
     for line in loops_in_use:
         if loop in loops_in_use:
@@ -173,14 +157,14 @@ def cli(destination_folder: str,
     destination_pool_file = destination / Path("test_pool_{}".format(timestamp))
     if verbose:
         ic(destination_pool_file)
-    dd("if=/dev/zero", "of={}".format(destination_pool_file), "bs={}M".format(zpool_size_mb), "count=1")
+    sh.dd("if=/dev/zero", "of={}".format(destination_pool_file), "bs={}M".format(zpool_size_mb), "count=1")
     #dd if=/dev/urandom of=temp_zfs_key bs=32 count=1 || exit 1
     #key_path=`readlink -f temp_zfs_key`
 
-    losetup(loop, destination_pool_file, loop)
+    sh.losetup(loop, destination_pool_file, loop)
     atexit.register(cleanup_loop_device, loop)
     if verbose:
-        ic(losetup("-l"))
+        ic(sh.losetup("-l"))
 
     zpool_name = destination_pool_file.name
     if verbose:
@@ -215,11 +199,11 @@ def cli(destination_folder: str,
     except Exception as e:
         ic(e)
 
-    ic(ls("-alh", zfs_mountpoint))
+    ic(sh.ls("-alh", zfs_mountpoint))
 
     check_df(destination_pool_file)
 
-    sync()
+    sh.sync()
     pathstat_results = pathstat(path=zfs_mountpoint, verbose=verbose)
     display_results(pathstat_results, verbose=verbose)
     # 128K recordsize: 81266
@@ -246,16 +230,16 @@ def cli(destination_folder: str,
     compressed_file_size = os.stat(destination_pool_file_rzip).st_size
     #ic(compressed_file_size)
 
-    print('Summary:')
+    print('\nSummary:')
     #ic(pathstat_results)
     bytes_in_names = pathstat_results['bytes_in_names']
     objects_created = pathstat_results[4]
-    print('Why did this {zpool_size_mb}MB pool run out of space?\n We wrote exactly {bytes_in_names} bytes to it by creating {objects_created} empty directories (with random uncompressable names) under the root of the zfs filesystem.\n Compressed, the pool file takes {compressed_file_size} bytes.'.format(zpool_size_mb=zpool_size_mb, compressed_file_size=compressed_file_size, bytes_in_names=bytes_in_names, objects_created=objects_created))
+    print('Why did this {zpool_size_mb}MB pool run out of space?\nExactly {bytes_in_names} bytes were written to it by creating {objects_created} empty directories (with random uncompressable names) under the root of the zfs filesystem.\nCompressed, the pool file takes {compressed_file_size} bytes.'.format(zpool_size_mb=zpool_size_mb, compressed_file_size=compressed_file_size, bytes_in_names=bytes_in_names, objects_created=objects_created))
 
     compression_ratio = (compressed_file_size / (zpool_size_mb * 1024 * 1024)) * 100
-    ic(compression_ratio)
+    print(str(round(compression_ratio, 2)) + 'X')
 
-    print("How can more 64byte randomly named empty directories be created under the root of this {zpool_size_mb}MB pool?".format(zpool_size_mb=zpool_size_mb))
+    print("\nHow can more 64byte randomly named empty directories be created under the root of this {zpool_size_mb}MB pool?".format(zpool_size_mb=zpool_size_mb))
     if ipython:
         import IPython
         IPython.embed()
