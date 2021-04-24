@@ -254,6 +254,8 @@ def cli(destination_folder: str,
 
     compression_ratio = (compressed_file_size / (zpool_size_mb * 1024 * 1024)) * 100
     ic(compression_ratio)
+
+    print("How can more 64byte randomly named empty directories be created under the root of this {zpool_size_mb}MB pool?".format(zpool_size_mb=zpool_size_mb))
     if ipython:
         import IPython
         IPython.embed()
