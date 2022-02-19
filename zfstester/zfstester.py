@@ -93,7 +93,7 @@ def destroy_zfs_pool(pool):
 @click.argument(
     "destination_folder",
     type=click.Path(
-        exists=True, dir_okay=True, file_okay=False, path_type=str, allow_dash=False
+        exists=True, dir_okay=True, file_okay=False, path_type=Path, allow_dash=False
     ),
     nargs=1,
     required=True,
@@ -101,7 +101,7 @@ def destroy_zfs_pool(pool):
 @click.option(
     "--loop",
     type=click.Path(
-        exists=True, dir_okay=False, file_okay=True, path_type=str, allow_dash=False
+        exists=True, dir_okay=False, file_okay=True, path_type=Path, allow_dash=False
     ),
     nargs=1,
     required=False,
@@ -117,8 +117,8 @@ def destroy_zfs_pool(pool):
 @click.pass_context
 def cli(
     ctx,
-    destination_folder: str,
-    loop: str,
+    destination_folder: Path,
+    loop: Path,
     zpool_size_mb: int,
     recordsize: str,
     verbose: Union[bool, int, float],
@@ -146,9 +146,7 @@ def cli(
 
     if not loop:
         free_loop = sh.losetup("--find").splitlines()
-        ic(free_loop)
-        exit(1)
-        loop = "/dev/loop0"
+        loop = Path(free_loop[0])
 
     if not path_is_block_special(loop):
         raise ValueError(f"loop device path {loop} is not block special")
