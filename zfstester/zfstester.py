@@ -189,7 +189,7 @@ def cli(
         "-O",
         "mountpoint=none",
         "-O",
-        "recordsize={recordsize}",
+        f"recordsize={recordsize}",
         zpool_name,
         loop,
     ]
