@@ -204,7 +204,7 @@ def cli(
         "-o",
         f"mountpoint={zfs_mountpoint.as_posix()}",
         "-o",
-        "recordsize={recordsize}",
+        f"recordsize={recordsize}",
         zfs_filesystem,
     ]
     run_command(zfs_create_command, verbose=True)
