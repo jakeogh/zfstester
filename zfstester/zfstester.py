@@ -145,21 +145,24 @@ def cli(
         ic(timestamp)
 
     if not loop:
+        free_loop = sh.losetup("--find").splitlines()
+        ic(free_loop)
+        exit(1)
         loop = "/dev/loop0"
 
     if not path_is_block_special(loop):
-        raise ValueError("loop device path {} is not block special".format(loop))
+        raise ValueError(f"loop device path {loop} is not block special")
 
     loops_in_use = sh.losetup("-l").splitlines()
     # ic(loops_in_use)
     for line in loops_in_use:
         if loop in loops_in_use:
-            raise ValueError("loop device {} already in use".format(loop))
+            raise ValueError(f"loop device {loop} already in use")
 
-    destination = Path(destination_folder) / Path("zfstester_" + timestamp)
+    destination = Path(destination_folder) / Path(f"zfstester_{timestamp}")
     os.makedirs(destination)
 
-    destination_pool_file = destination / Path("test_pool_{}".format(timestamp))
+    destination_pool_file = destination / Path(f"test_pool_{timestamp}")
     if verbose:
         ic(destination_pool_file)
     sh.dd(
