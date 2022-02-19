@@ -180,8 +180,8 @@ def cli(
     zpool_name = destination_pool_file.name
     if verbose:
         ic(zpool_name)
-    zpool_create_command = [
-        "zpool",
+    zpool_create_command = sh.Command("zpool")
+    zpool_create_command = zpool_create_command.bake(
         "create",
         "-O",
         "atime=off",
@@ -193,8 +193,11 @@ def cli(
         f"recordsize={recordsize}",
         zpool_name,
         loop,
-    ]
-    run_command(zpool_create_command, verbose=True)
+    )
+    zpool_create_command_result = zpool_create_command().splitlines()
+    ic(zpool_create_command_result)
+
+    # run_command(zpool_create_command, verbose=True)
     # atexit.register(destroy_zfs_pool, zpool_name)
 
     zfs_mountpoint = Path(f"{destination_pool_file.as_posix()}_mountpoint")
