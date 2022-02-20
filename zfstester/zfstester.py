@@ -314,7 +314,7 @@ def cli(
     print("\nSummary:")
     # ic(pathstat_results)
     print("pool file:")
-    os.system("".join(["/bin/ls", "-al", destination_pool_file.as_posix()]))
+    os.system(" ".join(["/bin/ls", "-al", destination_pool_file.as_posix()]))
     bytes_in_names = pathstat_results["bytes_in_names"]
     objects_created = pathstat_results[4]
     print()
