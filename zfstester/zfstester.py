@@ -202,18 +202,20 @@ def cli(
 
     zfs_mountpoint = Path(f"{destination_pool_file.as_posix()}_mountpoint")
     zfs_filesystem = f"{zpool_name}/spacetest"
-    zfs_create_command = [
-        "zfs",
+    zfs_create_command = sh.Command("zfs")
+    zfs_create_command = zfs_create_command.bake(
         "create",
         "-o",
         f"mountpoint={zfs_mountpoint.as_posix()}",
         "-o",
         f"recordsize={recordsize}",
         zfs_filesystem,
-    ]
-    run_command(zfs_create_command, verbose=True)
-    # atexit.register(destroy_zfs_filesystem, zfs_filesystem)
+    )
+    zfs_create_command_result = zfs_create_command().splitlines()
+    ic(zfs_create_command_result)
+
     atexit.register(umount_zfs_filesystem, zfs_mountpoint)
+    # atexit.register(destroy_zfs_filesystem, zfs_filesystem)
 
     # disabled just for pure space tests
     # zfs create -o encryption=on -o keyformat=raw -o keylocation=file://"${key_path}" -o mountpoint=/"${destination_pool_file}"/spacetest_enc "${destination_pool_file}"/spacetest_enc || exit 1
