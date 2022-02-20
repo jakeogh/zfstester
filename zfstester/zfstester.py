@@ -251,39 +251,49 @@ def cli(
         if index == 0:
             print(line)  # df -i header
         if destination_pool_file.name in line:
-            print(line)
+            df_line = line
+            print(df_line)
+            Inodes, IUsed, IFree, IUse = df_line.split()[1:5]
 
     destination_pool_file_rzip = destination_pool_file.as_posix() + ".rz"
     sh.rzip(
         "-k", "-9", "-o", destination_pool_file_rzip, destination_pool_file.as_posix()
     )
     compressed_file_size = os.stat(destination_pool_file_rzip).st_size
+
+    destination_pool_file_sparse_copy = Path(
+        destination_pool_file.as_posix() + ".sparse"
+    )
+    sh.cp(
+        "-v",
+        "-i",
+        "--sparse=always",
+        destination_pool_file,
+        destination_pool_file_sparse_copy,
+    )
+    destination_pool_file_sparse_copy_file_size = (
+        os.stat(destination_pool_file_sparse_copy).st_blocks * 512
+    )
+
     # ic(compressed_file_size)
 
     print("\nSummary:")
     # ic(pathstat_results)
+    print("pool file:")
+    os.system("".join(["/bin/ls", "-al", destination_pool_file.as_posix()]))
     bytes_in_names = pathstat_results["bytes_in_names"]
     objects_created = pathstat_results[4]
     print()
-    print("pool file:")
-    os.system("".join(["/bin/ls", "-al", destination_pool_file.as_posix()]))
     print(
-        "What caused the {zpool_size_mb}MB pool to run out of space?\n{bytes_in_names} bytes were written to the pool by creating {objects_created} empty directories (with random uncompressable names) under the root of the zfs filesystem.\nCompressed, the pool file takes {compressed_file_size} bytes.".format(
-            zpool_size_mb=zpool_size_mb,
-            compressed_file_size=compressed_file_size,
-            bytes_in_names=bytes_in_names,
-            objects_created=objects_created,
-        )
+        f"The {zpool_size_mb}MB pool ran out of free inodes (there are {IFree} out of {Inodes} left) after {bytes_in_names} bytes were written by creating {objects_created} empty directories (with random uncompressable names, under the root).\nCompressed, the pool file takes {compressed_file_size} bytes."
     )
 
     compression_ratio = (compressed_file_size / (zpool_size_mb * 1024 * 1024)) * 100
     print("compresson ratio:", str(round(compression_ratio, 2)) + "x")
-
     print(
-        "\nCan more 64B random empty directories be created?".format(
-            zpool_size_mb=zpool_size_mb
-        )
+        f"A sparse copy of the pool file is {destination_pool_file_sparse_copy_file_size/1024/1024}MB"
     )
+
     if ipython:
         import IPython
 
