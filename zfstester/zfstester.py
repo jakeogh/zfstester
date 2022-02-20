@@ -42,8 +42,10 @@ from pathstat import pathstat
 # from getdents import paths
 from pathtool import path_is_block_special
 from run_command import run_command
+from timetool import timeit
 
 
+@timeit
 def make_things(
     root: Path, count: Optional[int], thing_function: Callable[[Path], None]
 ) -> None:
@@ -98,16 +100,9 @@ def destroy_zfs_pool(pool):
     nargs=1,
     required=True,
 )
-@click.option(
-    "--loop",
-    type=click.Path(
-        exists=True, dir_okay=False, file_okay=True, path_type=Path, allow_dash=False
-    ),
-    nargs=1,
-    required=False,
-)
 @click.option("--verbose", is_flag=True)
 @click.option("--ipython", is_flag=True)
+@click.option("--loopback", is_flag=True)
 @click.option("--record-count", type=int)
 @click.option("--zpool-size-mb", type=int, default=64)
 @click.option(
@@ -118,11 +113,11 @@ def destroy_zfs_pool(pool):
 def cli(
     ctx,
     destination_folder: Path,
-    loop: Path,
     zpool_size_mb: int,
     recordsize: str,
     verbose: Union[bool, int, float],
     verbose_inf: bool,
+    loopback: bool,
     record_count: int,
     ipython: bool,
 ):
@@ -144,18 +139,18 @@ def cli(
     if verbose:
         ic(timestamp)
 
-    if not loop:
+    if loopback:
         free_loop = sh.losetup("--find").splitlines()
         loop = Path(free_loop[0])
 
-    if not path_is_block_special(loop):
-        raise ValueError(f"loop device path {loop} is not block special")
+        if not path_is_block_special(loop):
+            raise ValueError(f"loop device path {loop} is not block special")
 
-    loops_in_use = sh.losetup("-l").splitlines()
-    # ic(loops_in_use)
-    for line in loops_in_use:
-        if loop in loops_in_use:
-            raise ValueError(f"loop device {loop} already in use")
+        loops_in_use = sh.losetup("-l").splitlines()
+        # ic(loops_in_use)
+        for line in loops_in_use:
+            if loop in loops_in_use:
+                raise ValueError(f"loop device {loop} already in use")
 
     destination = Path(destination_folder) / Path(f"zfstester_{timestamp}")
     os.makedirs(destination)
@@ -172,10 +167,11 @@ def cli(
     # dd if=/dev/urandom of=temp_zfs_key bs=32 count=1 || exit 1
     # key_path=`readlink -f temp_zfs_key`
 
-    sh.losetup(loop, destination_pool_file, loop)
-    atexit.register(cleanup_loop_device, loop)
-    if verbose:
-        ic(sh.losetup("-l"))
+    if loopback:
+        sh.losetup(loop, destination_pool_file, loop)
+        atexit.register(cleanup_loop_device, loop)
+        if verbose:
+            ic(sh.losetup("-l"))
 
     zpool_name = destination_pool_file.name
     if verbose:
@@ -192,8 +188,12 @@ def cli(
         "-O",
         f"recordsize={recordsize}",
         zpool_name,
-        loop,
     )
+    if loopback:
+        zpool_create_command = zpool_create_command.bake(loop)
+    else:
+        zpool_create_command = zpool_create_command.bake(destination_pool_file)
+
     zpool_create_command_result = zpool_create_command().splitlines()
     ic(zpool_create_command_result)
 
