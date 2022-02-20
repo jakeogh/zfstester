@@ -237,12 +237,10 @@ def cli(
     # 128K recordsize: 81266
     # 512  recordsize: 80894
 
-    zfs_get_all_command = ["zfs", "get", "all"]
-    output = run_command(
-        zfs_get_all_command,
-        verbose=verbose,
-    ).decode("utf8")
-    for line in output.splitlines():
+    zfs_get_all_command = sh.Command("zfs")
+    zfs_get_all_command = zfs_get_all_command.bake("get", "all")
+    zfs_get_all_command_results = zfs_get_all_command().splitlines()
+    for line in zfs_get_all_command_results:
         if destination_pool_file.name in line:
             print(line)
 
@@ -267,9 +265,10 @@ def cli(
     bytes_in_names = pathstat_results["bytes_in_names"]
     objects_created = pathstat_results[4]
     print()
+    print("pool file:")
     os.system("".join(["/bin/ls", "-al", destination_pool_file.as_posix()]))
     print(
-        "Why did this {zpool_size_mb}MB pool run out of space?\nExactly {bytes_in_names} bytes were written to it by creating {objects_created} empty directories (with random uncompressable names) under the root of the zfs filesystem.\nCompressed, the pool file takes {compressed_file_size} bytes.".format(
+        "What caused the {zpool_size_mb}MB pool to run out of space?\n{bytes_in_names} bytes were written to the pool by creating {objects_created} empty directories (with random uncompressable names) under the root of the zfs filesystem.\nCompressed, the pool file takes {compressed_file_size} bytes.".format(
             zpool_size_mb=zpool_size_mb,
             compressed_file_size=compressed_file_size,
             bytes_in_names=bytes_in_names,
@@ -278,10 +277,10 @@ def cli(
     )
 
     compression_ratio = (compressed_file_size / (zpool_size_mb * 1024 * 1024)) * 100
-    print(str(round(compression_ratio, 2)) + "X")
+    print("compresson ratio:", str(round(compression_ratio, 2)) + "x")
 
     print(
-        "\nHow can more 64byte randomly named empty directories be created under the root of this {zpool_size_mb}MB pool?".format(
+        "\nCan more 64B random empty directories be created?".format(
             zpool_size_mb=zpool_size_mb
         )
     )
