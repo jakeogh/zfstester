@@ -237,12 +237,46 @@ def cli(
     # 128K recordsize: 81266
     # 512  recordsize: 80894
 
+    zfs_get_all_command_results_interesting_lines = []
     zfs_get_all_command = sh.Command("zfs")
     zfs_get_all_command = zfs_get_all_command.bake("get", "all")
     zfs_get_all_command_results = zfs_get_all_command().splitlines()
+    interesting_fields = [
+        "used",
+        "available",
+        "referenced",
+        "compressratio",
+        "recordsize",
+        "checksum",
+        "compression",
+        "xattr",
+        "copies",
+        "version",
+        "usedbysnapshots",
+        "usedbydataset",
+        "usedbychildren",
+        "usedbyrefreservation",
+        "dedup",
+        "dnodesize",
+        "refcompressratio",
+        "written",
+        "logicalused",
+        "logicalreferenced",
+        "acltype",
+        "redundant_metadata",
+        "encryption",
+        "snapshot_count",
+        "special_small_blocks",
+    ]
     for line in zfs_get_all_command_results:
         if destination_pool_file.name in line:
+            if line.split()[1] in interesting_fields:
+                zfs_get_all_command_results_interesting_lines.append(line)
             print(line)
+
+    print("Interesting lines from above:")
+    for line in zfs_get_all_command_results_interesting_lines:
+        print(line)
 
     df_inodes = str(sh.df("-i"))
     # ic(df_inodes)
