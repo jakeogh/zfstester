@@ -266,6 +266,8 @@ def cli(
     # ic(pathstat_results)
     bytes_in_names = pathstat_results["bytes_in_names"]
     objects_created = pathstat_results[4]
+    print()
+    os.system("".join(["/bin/ls", "-al", destination_pool_file.as_posix()]))
     print(
         "Why did this {zpool_size_mb}MB pool run out of space?\nExactly {bytes_in_names} bytes were written to it by creating {objects_created} empty directories (with random uncompressable names) under the root of the zfs filesystem.\nCompressed, the pool file takes {compressed_file_size} bytes.".format(
             zpool_size_mb=zpool_size_mb,
