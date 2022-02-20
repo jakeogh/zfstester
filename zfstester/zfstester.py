@@ -274,7 +274,7 @@ def cli(
                 zfs_get_all_command_results_interesting_lines.append(line)
             print(line)
 
-    print("Interesting lines from above:")
+    print("\nInteresting lines from above:")
     for line in zfs_get_all_command_results_interesting_lines:
         print(line)
 
@@ -325,7 +325,7 @@ def cli(
     compression_ratio = (compressed_file_size / (zpool_size_mb * 1024 * 1024)) * 100
     print("compresson ratio:", str(round(compression_ratio, 2)) + "x")
     print(
-        f"A sparse copy of the pool file is {destination_pool_file_sparse_copy_file_size/1024/1024}  {int(destination_pool_file_sparse_copy_file_size/1024/1024)}MB"
+        f"A sparse copy of the pool file is {destination_pool_file_sparse_copy_file_size}B (~{int(destination_pool_file_sparse_copy_file_size/1024/1024)}MB)"
     )
 
     if ipython:
