@@ -156,6 +156,8 @@ def cli(
     os.makedirs(destination)
 
     destination_pool_file = destination / Path(f"test_pool_{timestamp}")
+    destination_pool_file = destination_pool_file.resolve()
+
     if verbose:
         ic(destination_pool_file)
     sh.dd(
