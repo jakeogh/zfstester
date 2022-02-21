@@ -103,6 +103,7 @@ def destroy_zfs_pool(pool):
 @click.option("--verbose", is_flag=True)
 @click.option("--ipython", is_flag=True)
 @click.option("--loopback", is_flag=True)
+@click.option("--large-dnode", is_flag=True)
 @click.option("--record-count", type=int)
 @click.option("--zpool-size-mb", type=int, default=64)
 @click.option(
@@ -115,6 +116,7 @@ def cli(
     destination_folder: Path,
     zpool_size_mb: int,
     recordsize: str,
+    large_dnode: bool,
     verbose: Union[bool, int, float],
     verbose_inf: bool,
     loopback: bool,
@@ -211,8 +213,12 @@ def cli(
         f"mountpoint={zfs_mountpoint.as_posix()}",
         "-o",
         f"recordsize={recordsize}",
-        zfs_filesystem,
     )
+
+    if large_dnode:
+        zfs_create_command = zfs_create_command.bake("-o", "dnodesize=auto")
+
+    zfs_create_command = zfs_create_command.bake(zfs_filesystem)
     zfs_create_command_result = zfs_create_command().splitlines()
     ic(zfs_create_command_result)
 
