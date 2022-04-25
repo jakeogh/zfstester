@@ -24,7 +24,6 @@ import os
 import sys
 import time
 import uuid
-from math import inf
 from pathlib import Path
 from typing import Callable
 from typing import Optional
