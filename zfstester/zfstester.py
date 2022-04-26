@@ -173,7 +173,7 @@ def cli(
     # key_path=`readlink -f temp_zfs_key`
 
     if loopback:
-        sh.losetup(loop, destination_pool_file, loop)
+        sh.losetup(loop, destination_pool_file, loop)  # wtf
         atexit.register(cleanup_loop_device, loop)
         if verbose:
             ic(sh.losetup("-l"))
