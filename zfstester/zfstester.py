@@ -1,23 +1,26 @@
 #!/usr/bin/env python3
+# -*- coding: utf8 -*-
 
-# pylint: disable=C0111  # docstrings are always outdated and wrong
-# pylint: disable=W0511  # todo is encouraged
-# pylint: disable=C0301  # line too long
-# pylint: disable=R0902  # too many instance attributes
-# pylint: disable=C0302  # too many lines in module
-# pylint: disable=C0103  # single letter var names, func name too descriptive
-# pylint: disable=R0911  # too many return statements
-# pylint: disable=R0912  # too many branches
-# pylint: disable=R0915  # too many statements
-# pylint: disable=R0913  # too many arguments
-# pylint: disable=R1702  # too many nested blocks
-# pylint: disable=R0914  # too many local variables
-# pylint: disable=R0903  # too few public methods
-# pylint: disable=E1101  # no member for base
-# pylint: disable=W0201  # attribute defined outside __init__
-# pylint: disable=R0916  # Too many boolean expressions in if statement
+# pylint: disable=useless-suppression             # [I0021]
+# pylint: disable=missing-docstring               # [C0111] docstrings are always outdated and wrong
+# pylint: disable=fixme                           # [W0511] todo is encouraged
+# pylint: disable=line-too-long                   # [C0301]
+# pylint: disable=too-many-instance-attributes    # [R0902]
+# pylint: disable=too-many-lines                  # [C0302] too many lines in module
+# pylint: disable=invalid-name                    # [C0103] single letter var names, name too descriptive
+# pylint: disable=too-many-return-statements      # [R0911]
+# pylint: disable=too-many-branches               # [R0912]
+# pylint: disable=too-many-statements             # [R0915]
+# pylint: disable=too-many-arguments              # [R0913]
+# pylint: disable=too-many-nested-blocks          # [R1702]
+# pylint: disable=too-many-locals                 # [R0914]
+# pylint: disable=too-few-public-methods          # [R0903]
+# pylint: disable=no-member                       # [E1101] no member for base
+# pylint: disable=attribute-defined-outside-init  # [W0201]
+# pylint: disable=too-many-boolean-expressions    # [R0916] in if statement
 
 # pylint: disable=no-name-in-module  # sh
+from __future__ import annotations
 
 import atexit
 import os
@@ -26,27 +29,26 @@ import time
 import uuid
 from pathlib import Path
 from typing import Callable
-from typing import Optional
-from typing import Union
 
 import click
 import sh
 from asserttool import ic
-# from with_chdir import chdir
 from clicktool import click_add_options
 from clicktool import click_global_options
 from clicktool import tv
 from pathstat import display_results
 from pathstat import pathstat
-# from getdents import paths
 from pathtool import path_is_block_special
 from run_command import run_command
 from timetool import timeit
 
+# from getdents import paths
+# from with_chdir import chdir
+
 
 @timeit
 def make_things(
-    root: Path, count: Optional[int], thing_function: Callable[[Path], None]
+    root: Path, count: None | int, thing_function: Callable[[Path], None]
 ) -> None:
     assert thing_function in [os.makedirs, os.mknod, os.symlink]
     timestamp = str(time.time())
@@ -118,11 +120,12 @@ def cli(
     recordsize: str,
     large_dnode: bool,
     no_acl: bool,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
     loopback: bool,
     record_count: int,
     ipython: bool,
+    dict_output: bool,
 ):
 
     tty, verbose = tv(
